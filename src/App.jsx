@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import "./App.css";
 
 // To use a photo of Mum: put mum.jpeg in your /public folder,
@@ -93,6 +93,25 @@ function Bunting() {
       ))}
     </div>
   );
+}
+
+/* ---------- Textarea that grows to fit its text (no inner scrolling) ---------- */
+function AutoTextarea(props) {
+  const ref = useRef(null);
+  const resize = () => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  };
+  useLayoutEffect(resize, [props.value]);
+  useEffect(() => {
+    resize();
+    document.fonts?.ready.then(resize);
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
+  }, []);
+  return <textarea ref={ref} rows={1} {...props} />;
 }
 
 /* ---------- App ---------- */
@@ -196,10 +215,10 @@ export default function App() {
                     aria-label="Sender name"
                   />
                 </label>
-                <textarea
+                <AutoTextarea
                   value={data[m.id].text}
                   onChange={(e) => edit(m.id, "text", e.target.value)}
-                  maxLength={260}
+                  maxLength={1500}
                   aria-label={`Message from ${data[m.id].name}`}
                 />
               </article>
